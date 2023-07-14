@@ -129,7 +129,11 @@ class MediaManager extends Extension
      */
     protected function getFullPath($path)
     {
-        return $this->storage->path($path);
+        $fullPath = $this->storage->path($path);
+        if (strstr($fullPath, '..')) {
+            throw new \Exception('Incorrect path');
+        }
+        return $fullPath;
     }
 
     public function download()
@@ -162,6 +166,11 @@ class MediaManager extends Extension
 
     public function move($new)
     {
+        $ext = strtolower(pathinfo($new, PATHINFO_EXTENSION));
+        if ($this->allowed && !in_array($ext, $this->allowed)) {
+            throw new \Exception('File extension ' . $ext . ' is not allowed');
+        }
+
         return $this->storage->move($this->path, $new);
     }
 
